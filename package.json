@@ -1,6 +1,6 @@
 {
-  "name": "@x3/pipeline-calcs",
-  "version": "1.0.0",
+  "name": "x3-pipeline-calcs",
+  "version": "1.0.1",
   "description": "Steel gas pipeline arithmetic from 49 CFR 192 with citations: design pressure, design/joint/temperature factors, class location, MAOP from test pressure, percent SMYS and potential impact radius.",
   "type": "module",
   "main": "dist/index.js",
@@ -49,5 +49,8 @@
   },
   "devDependencies": {
     "typescript": "^5.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

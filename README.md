@@ -9,13 +9,13 @@ Built and maintained by **[X3 Pipeline](https://x3pipeline.com)**.
 ## Install
 
 ```sh
-npm install github:x3allamerican/x3-pipeline-calcs
+npm install x3-pipeline-calcs
 ```
 
 ## Use
 
 ```ts
-import { classLocation, designPressure, testPressureFactor, maop, percentSmys, potentialImpactRadius, hcaByPirOver660 } from '@x3/pipeline-calcs';
+import { classLocation, designPressure, testPressureFactor, maop, percentSmys, potentialImpactRadius, hcaByPirOver660 } from 'x3-pipeline-calcs';
 
 const cls = classLocation({ buildings: 8 });                       // Class 1, 49 CFR 192.5(b)(1)(ii)
 const d = designPressure({ smys: 52000, wall: 0.25, od: 12.75, classLocation: 1, spec: 'API 5L', seam: 'erw' });
