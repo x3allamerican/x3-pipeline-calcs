@@ -1,0 +1,53 @@
+{
+  "name": "@x3/pipeline-calcs",
+  "version": "1.0.0",
+  "description": "Steel gas pipeline arithmetic from 49 CFR 192 with citations: design pressure, design/joint/temperature factors, class location, MAOP from test pressure, percent SMYS and potential impact radius.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "data",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/fix-dts.mjs",
+    "test": "node --test \"test/*.test.ts\"",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "phmsa",
+    "pipeline",
+    "49-cfr-192",
+    "maop",
+    "design-pressure",
+    "class-location",
+    "potential-impact-radius",
+    "hca",
+    "integrity-management",
+    "gas-pipeline"
+  ],
+  "author": "X3 Pipeline (https://x3pipeline.com)",
+  "license": "MIT",
+  "homepage": "https://github.com/x3allamerican/x3-pipeline-calcs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/x3allamerican/x3-pipeline-calcs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/x3allamerican/x3-pipeline-calcs/issues"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

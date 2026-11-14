@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gas Pipeline Design Pressure, MAOP and PIR Calculator (49 CFR 192) | X3 Pipeline</title>
+<meta name="description" content="Free 49 CFR Part 192 calculator: design pressure (192.105) with design, joint and temperature factors, class location, MAOP from test pressure (192.619), percent SMYS and potential impact radius (192.903). Every factor cited.">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="https://x3pipeline.com"><b>X3</b> Pipeline</a>
+  <nav><a href="https://github.com/x3allamerican/x3-pipeline-calcs">Source on GitHub</a><a href="https://x3pipeline.com">X3 Pipeline</a></nav>
+</header>
+<main>
+  <h1>Design pressure, MAOP <span>and PIR</span></h1>
+  <p class="lede">The steel gas pipeline arithmetic in 49 CFR Part 192, with the regulation behind every factor. Runs in your browser.</p>
+  <div class="grid">
+    <section class="box">
+      <h2>Pipe and location</h2>
+      <div class="row">
+        <div><label for="od">Outside diameter (in)</label><input id="od" type="number" step="0.001" value="12.75"></div>
+        <div><label for="wt">Wall thickness (in)</label><input id="wt" type="number" step="0.001" value="0.250"></div>
+        <div><label for="smys">SMYS (psi)</label><select id="smys"><option value="35000">Grade B (35,000)</option><option value="42000">X42</option><option value="46000">X46</option><option value="52000" selected>X52</option><option value="56000">X56</option><option value="60000">X60</option><option value="65000">X65</option><option value="70000">X70</option></select></div>
+      </div>
+      <div class="row">
+        <div><label for="bld">Buildings in the class location unit</label><input id="bld" type="number" value="8"></div>
+        <div><label for="cond">Special condition (192.111)</label><select id="cond"><option value="">None</option><option value="class1-on-bridge">Class 1: on a bridge</option><option value="class1-uncased-or-parallel-road-or-railroad">Class 1: uncased road or railroad crossing</option><option value="class2-uncased-road-or-railroad">Class 2: uncased road or railroad crossing</option><option value="station">Compressor, regulating or metering station</option></select></div>
+      </div>
+      <div class="row">
+        <div><label for="seam">Seam</label><select id="seam"><option value="erw">API 5L ERW / seamless / SAW</option><option value="furnace-butt">Furnace butt welded</option><option value="other">Other or unknown spec</option></select></div>
+        <div><label for="temp">Gas temperature (°F)</label><input id="temp" type="number" value="60"></div>
+      </div>
+      <div class="row">
+        <div><label for="tp">Test pressure (psig)</label><input id="tp" type="number" value="1800"></div>
+        <div><label for="inst">Installed</label><input id="inst" type="date" value="2008-06-01"></div>
+        <div><label for="hist">Historical max (psig, optional)</label><input id="hist" type="number"></div>
+      </div>
+    </section>
+    <section class="box">
+      <h2>Results</h2>
+      <div class="kpis" id="kpis"></div>
+      <ul class="list" id="out"></ul>
+    </section>
+  </div>
+  <p class="small" style="margin-top:22px">Decision support for qualified engineers, not a substitute for engineering judgment or legal advice. Steel gas pipelines; plastic and liquids rules differ.</p>
+</main>
+<footer>Free and open source (MIT) from <a href="https://x3pipeline.com">X3 Pipeline</a>: pipeline integrity, damage prevention, operator qualification and the rest of your PHMSA program in one place.</footer>
+<script type="module">
+import { classLocation, designPressure, testPressureFactor, maop, percentSmys, potentialImpactRadius } from './calcs.js';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function run() {
+  try {
+    const od = +$('od').value, wall = +$('wt').value, smys = +$('smys').value;
+    const cl = classLocation({ buildings: +$('bld').value });
+    const seam = $('seam').value;
+    const d = designPressure({ smys, wall, od, classLocation: cl.classLocation, condition: $('cond').value || undefined, spec: seam === 'other' ? 'other' : 'API 5L', seam: seam === 'other' ? undefined : seam, gasTempF: +$('temp').value });
+    const tf = testPressureFactor({ material: 'steel', classLocation: cl.classLocation, installed: $('inst').value });
+    const m = maop({ designPsig: d.psig, testPsig: +$('tp').value || undefined, testFactor: tf.factor, historicalPsig: $('hist').value ? +$('hist').value : undefined });
+    const pir = potentialImpactRadius(m.psig, od);
+    $('kpis').innerHTML = [[`Class ${cl.classLocation}`, 'Class location'], [`${d.psig} psig`, 'Design pressure'], [`${m.psig} psig`, 'MAOP (lowest limit)'], [`${percentSmys(m.psig, { smys, wall, od })}%`, 'Hoop stress at MAOP, % SMYS'], [`${pir.feet} ft`, 'Potential impact radius']]
+      .map(([v, k]) => `<div class="kpi"><b style="font-size:19px">${v}</b><span>${k}</span></div>`).join('');
+    $('out').innerHTML = `<li>${esc(cl.reason)} <span class="small">${esc(cl.citation)}</span></li>`
+      + `<li>Design pressure = ${esc(d.formula)} = <b>${d.psig} psig</b><br><span class="small">${d.citations.map(esc).join(' · ')}</span></li>`
+      + m.limits.map((l) => `<li>${l === m.controlling ? '<span class="pill warn">Controls</span> ' : ''}${esc(l.why)}: ${l.psig} psig <span class="small">${esc(l.citation)}</span></li>`).join('')
+      + `<li class="small">Test factor ${tf.factor} for Class ${cl.classLocation} steel installed ${esc($('inst').value)} (${esc(tf.citation)}). PIR = 0.69 x sqrt(MAOP x d²) (${esc(pir.citation)}).</li>`;
+  } catch (e) { $('out').innerHTML = `<li><span class="pill warn">Check</span> ${esc(e.message)}</li>`; $('kpis').innerHTML = ''; }
+}
+document.querySelectorAll('main input, main select').forEach((el) => el.addEventListener('input', run));
+run();
+</script>
+</body>
+</html>
